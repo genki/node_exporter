@@ -120,14 +120,11 @@ func NewStatCollector() (Collector, error) {
 		return nil, errors.New("could not initialize sysctl MIBs")
 	}
 	return &statCollector{
-		cpu: prometheus.NewCounterVec(
-			prometheus.CounterOpts{
-				Namespace: Namespace,
-				Name:      "cpu_seconds_total",
-				Help:      "Seconds the CPU spent in each mode.",
-			},
-			[]string{"cpu", "mode"},
-		),
+		cpu: typedDesc{prometheus.NewDesc(
+			prometheus.BuildFQName(Namespace, "cpu", "seconds_total"),
+			"Seconds the CPU spent in each mode.",
+			[]string{"cpu", "mode"}, nil,
+		), prometheus.CounterValue},
 	}, nil
 }
 
@@ -161,13 +158,11 @@ func (c *statCollector) Update(ch chan<- prometheus.Metric) (err error) {
 
 	for cpu := 0; cpu < int(ncpu); cpu++ {
 		base_idx := C.CPUSTATES * cpu
-		c.cpu.With(prometheus.Labels{"cpu": strconv.Itoa(cpu), "mode": "user"}).Set(float64(cpuTimes[base_idx+C.CP_USER]))
-		c.cpu.With(prometheus.Labels{"cpu": strconv.Itoa(cpu), "mode": "nice"}).Set(float64(cpuTimes[base_idx+C.CP_NICE]))
-		c.cpu.With(prometheus.Labels{"cpu": strconv.Itoa(cpu), "mode": "system"}).Set(float64(cpuTimes[base_idx+C.CP_SYS]))
-		c.cpu.With(prometheus.Labels{"cpu": strconv.Itoa(cpu), "mode": "interrupt"}).Set(float64(cpuTimes[base_idx+C.CP_INTR]))
-		c.cpu.With(prometheus.Labels{"cpu": strconv.Itoa(cpu), "mode": "idle"}).Set(float64(cpuTimes[base_idx+C.CP_IDLE]))
+		ch <- c.cpu.mustNewConstMetric(float64(cpuTimes[base_idx+C.CP_USER]), strconv.Itoa(cpu), "user")
+		ch <- c.cpu.mustNewConstMetric(float64(cpuTimes[base_idx+C.CP_NICE]), strconv.Itoa(cpu), "nice")
+		ch <- c.cpu.mustNewConstMetric(float64(cpuTimes[base_idx+C.CP_SYS]), strconv.Itoa(cpu), "system")
+		ch <- c.cpu.mustNewConstMetric(float64(cpuTimes[base_idx+C.CP_INTR]), strconv.Itoa(cpu), "interrupt")
+		ch <- c.cpu.mustNewConstMetric(float64(cpuTimes[base_idx+C.CP_IDLE]), strconv.Itoa(cpu), "idle")
 	}
-
-	c.cpu.Collect(ch)
 	return err
 }
