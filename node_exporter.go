@@ -124,6 +124,7 @@ func main() {
 		metricsPath       = flag.String("web.telemetry-path", "/metrics", "Path under which to expose metrics.")
 		enabledCollectors = flag.String("collectors.enabled", filterAvailableCollectors(defaultCollectors), "Comma-separated list of collectors to use.")
 		printCollectors   = flag.Bool("collectors.print", false, "If true, print available collectors and exit.")
+		instanceName      = flag.String("name", "", "Tell the instance name.")
 	)
 	flag.Parse()
 
@@ -172,6 +173,11 @@ func main() {
 			</body>
 			</html>`))
 	})
+	if *instanceName != "" {
+		http.HandleFunc("/name", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte(*instanceName))
+		})
+	}
 
 	log.Infoln("Listening on", *listenAddress)
 	err = http.ListenAndServe(*listenAddress, nil)
