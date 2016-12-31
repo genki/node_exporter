@@ -43,6 +43,10 @@ build: promu
 	@echo ">> building binaries"
 	@$(PROMU) build --prefix $(PREFIX)
 
+build_by_docker:
+	@docker run --rm -v $(PWD):/go/src/github.com/prometheus/node_exporter \
+		-w /go/src/github.com/prometheus/node_exporter golang make
+
 tarball: promu
 	@echo ">> building release tarball"
 	@$(PROMU) tarball --prefix $(PREFIX) $(BIN_DIR)
