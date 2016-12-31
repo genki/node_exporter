@@ -44,7 +44,7 @@ build: promu
 	@$(PROMU) build --prefix $(PREFIX)
 
 build_by_docker:
-	@docker run --rm -v $(PWD):/go/src/github.com/prometheus/node_exporter \
+	@docker run --rm -it -v $(PWD):/go/src/github.com/prometheus/node_exporter \
 		-w /go/src/github.com/prometheus/node_exporter golang make
 
 tarball: promu

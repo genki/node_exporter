@@ -16,6 +16,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -124,7 +125,7 @@ func main() {
 		metricsPath       = flag.String("web.telemetry-path", "/metrics", "Path under which to expose metrics.")
 		enabledCollectors = flag.String("collectors.enabled", filterAvailableCollectors(defaultCollectors), "Comma-separated list of collectors to use.")
 		printCollectors   = flag.Bool("collectors.print", false, "If true, print available collectors and exit.")
-		instanceName      = flag.String("name", "", "Tell the instance name.")
+		instanceNameFile  = flag.String("name", "", "Tell the instance name specified in the file.")
 	)
 	flag.Parse()
 
@@ -173,9 +174,11 @@ func main() {
 			</body>
 			</html>`))
 	})
-	if *instanceName != "" {
+	if *instanceNameFile != "" {
+		name, _ := ioutil.ReadFile(*instanceNameFile)
+		instanceName := []byte(strings.TrimSpace(string(name)))
 		http.HandleFunc("/name", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte(*instanceName))
+			w.Write(instanceName)
 		})
 	}
 
