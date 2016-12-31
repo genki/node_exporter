@@ -45,7 +45,8 @@ build: promu
 
 build_by_docker:
 	@docker run --rm -it -v $(PWD):/go/src/github.com/prometheus/node_exporter \
-		-w /go/src/github.com/prometheus/node_exporter golang make
+		-w /go/src/github.com/prometheus/node_exporter -e CGO_ENABLED=0 golang \
+		go build -installsuffix .
 
 tarball: promu
 	@echo ">> building release tarball"
