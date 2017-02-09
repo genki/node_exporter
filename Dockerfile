@@ -1,5 +1,6 @@
-FROM        quay.io/prometheus/busybox:latest
-MAINTAINER  The Prometheus Authors <prometheus-developers@googlegroups.com>
+#FROM        quay.io/prometheus/busybox:latest
+#MAINTAINER  The Prometheus Authors <prometheus-developers@googlegroups.com>
+FROM alpine
 
 COPY node_exporter /bin/node_exporter
 
